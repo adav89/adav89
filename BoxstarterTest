@@ -1,0 +1,59 @@
+Write-BoxstarterMessage "Setting Execution Policy to Unrestricted and Disabling UAC"
+
+Update-ExecutionPolicy Unrestricted 
+Disable-UAC 
+Restart-Computer
+
+Write-BoxstarterMessage "Setting Standby Timeout to Never"
+powercfg -change -standby-timeout-ac 0
+powercfg -change -standby-timeout-dc 0
+ 
+Write-BoxstarterMessage "Setting Monitor Timeout to 240 minutes"
+powercfg -change -monitor-timeout-ac 240
+powercfg -change -monitor-timeout-dc 20
+ 
+Write-BoxstarterMessage "Setting Disk Timeout to Never"
+powercfg -change -disk-timeout-ac 0
+powercfg -change -disk-timeout-dc 0
+ 
+Write-BoxstarterMessage "Turning off Windows Hibernation"
+powercfg -h off
+
+Write-BoxstarterMessage "Downloading, Installing Windows Updates then rebooting if needed."
+
+Install-WindowsUpdate -AcceptEula -GetUpdatesFromMS
+if (Test-PendingReboot) { Invoke-Reboot }
+
+Write-BoxstarterMessage "Windows Updates complete, Disabling Windows Update until Boxstarter is finished."
+
+Disable-MicrosoftUpdate
+
+Write-BoxstarterMessage "Installing Selected Software"
+
+Write-BoxstarterMessage "Installing 7Zip"
+choco install 7zip.install -y
+
+Write-BoxstarterMessage "Installing Firefox"
+choco install Firefox -y
+
+Write-BoxstarterMessage "Installing Chrome"
+choco install googlechrome -y
+
+choco install vcredist2015 -y
+choco install vcredist2012 -y
+
+choco install sysinternals -y
+
+Write-BoxstarterMessage "Setting Explorer options and Taskbar up the way you like, and Disabling a few features that will be unused or needed"
+Disable-InternetExplorerESC
+Disable-BingSearch
+Disable-GameBarTips
+
+
+Write-BoxstarterMessage "Enabling UAC, Windows Update, and Cleaning up Boxstarter junk"
+
+Update-ExecutionPolicy Unrestricted
+Enable-MicrosoftUpdate
+Install-WindowsUpdate -acceptEula -GetUpdatesFromMS
+
+Enable-UAC
